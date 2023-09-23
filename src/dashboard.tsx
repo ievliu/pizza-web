@@ -1,21 +1,20 @@
-import { useEffect, useState } from "react";
-import { Pizza, fetchPizzas } from "./api";
+import useAxios from "axios-hooks";
+import { Api, Pizza } from "./api";
 
 export const Dashboard = () => {
-  const [pizza, setPizza] = useState<Pizza>();
+  const { getPizzas } = Api;
 
-  useEffect(() => {
-    (async () => {
-      const pizzas = await fetchPizzas();
-      console.log(pizzas);
-    })();
-  }, []);
+  const [{ data, loading, error }] = useAxios<Pizza[]>(getPizzas);
+
+  if (loading) return <p>Loading...</p>;
+  if (error || !data) return <p>Error!</p>;
+  console.log(data);
 
   return (
     <div>
       Pizza
-      {pizza?.Id}
-      {pizza?.Name}
+      <p>{data[0].id}</p>
+      <p>{data[0].name}</p>
     </div>
   );
 };
