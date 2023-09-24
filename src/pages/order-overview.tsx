@@ -1,15 +1,18 @@
 import { useParams } from "react-router-dom";
+import { Api, Order } from "../api";
+import useAxios from "axios-hooks";
 
 export const OrderOverview = () => {
   const { orderId } = useParams();
+  const { getOrderById } = Api;
+  const [{ data, loading }] = useAxios<Order>(getOrderById(orderId));
 
-  if (!orderId) throw new Error("No orderId");
-
-  const toppings = ["Cheese", "Tomato", "Mushrooms", "Pepperoni"];
+  if (loading) return <p>Loading...</p>;
+  if (!data) throw new Error("No data!");
 
   return (
     <div className="flex flex-col w-full gap-4">
-      <div className="text-2xl font-semibold text-center">Order #{orderId}</div>
+      <div className="text-2xl font-semibold text-center">Order #{data.id}</div>
       <div>
         <div className="overflow-x-auto">
           <table className="table">
@@ -19,7 +22,7 @@ export const OrderOverview = () => {
               </tr>
             </thead>
             <tbody>
-              {toppings.map((topping, index) => (
+              {data.pizzaToppings.map((topping, index) => (
                 <tr key={index} className="hover">
                   <td>{topping}</td>
                 </tr>
@@ -35,11 +38,11 @@ export const OrderOverview = () => {
             <tbody>
               <tr className="hover">
                 <td>Size</td>
-                <td className="font-semibold">Large</td>
+                <td className="font-semibold">{data.pizzaSize}</td>
               </tr>
               <tr className="hover">
                 <td>Total</td>
-                <td className="font-semibold">€ 12.00</td>
+                <td className="font-semibold">€ {data.total}</td>
               </tr>
             </tbody>
           </table>

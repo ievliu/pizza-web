@@ -1,4 +1,6 @@
+import useAxios from "axios-hooks";
 import { Link } from "react-router-dom";
+import { Api, Order } from "../api";
 
 export const Orders = () => {
   return (
@@ -15,12 +17,13 @@ export const Orders = () => {
 };
 
 const OrderList = () => {
-  const test = [1, 2, 3];
+  const { getAllOrders } = Api;
+  const [{ data }] = useAxios<Order[]>(getAllOrders);
 
   return (
     <ul className="rounded-lg menu bg-base-200">
-      {test.map((item) => (
-        <OrderItem id={item.toString()} key={item} name={`Order ${item}`} />
+      {data?.map((order) => (
+        <OrderItem id={order.id} key={order.id} />
       ))}
     </ul>
   );
@@ -28,13 +31,12 @@ const OrderList = () => {
 
 interface OrderItemProps {
   id: string;
-  name: string;
 }
 
-const OrderItem = ({ name, id }: OrderItemProps) => {
+const OrderItem = ({ id }: OrderItemProps) => {
   return (
     <li>
-      <Link to={`orders/${id}`}>{name}</Link>
+      <Link to={`orders/${id}`}>{`Order ${id}`}</Link>
     </li>
   );
 };
