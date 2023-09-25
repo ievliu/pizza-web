@@ -26,9 +26,11 @@ export interface Order {
   total: number;
 }
 
-export const Api = {
+export const api = {
   getPizzas: `${BASE_URL}/all`,
   getAllOrders: `${BASE_URL}/Orders`,
+  calculateTotal: `${BASE_URL}/Orders/CalculateTotal`,
+  createOrder: `${BASE_URL}/Orders`,
   getOrderById: (id?: string) => {
     if (!id) {
       throw new Error("Id is required");

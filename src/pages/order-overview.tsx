@@ -1,10 +1,10 @@
 import { useParams } from "react-router-dom";
-import { Api, Order } from "../api";
+import { api, Order } from "../api";
 import useAxios from "axios-hooks";
 
 export const OrderOverview = () => {
   const { orderId } = useParams();
-  const { getOrderById } = Api;
+  const { getOrderById } = api;
   const [{ data, loading }] = useAxios<Order>(getOrderById(orderId));
 
   if (loading) return <p>Loading...</p>;

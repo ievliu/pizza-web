@@ -1,8 +1,8 @@
 import useAxios from "axios-hooks";
-import { Api, Pizza } from "./api";
+import { api, Pizza } from "./api";
 
 export const Dashboard = () => {
-  const { getPizzas } = Api;
+  const { getPizzas } = api;
 
   const [{ data, loading, error }] = useAxios<Pizza[]>(getPizzas);
 
