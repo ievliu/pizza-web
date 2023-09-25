@@ -1,10 +1,5 @@
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export interface Pizza {
-  id: string;
-  name: string;
-}
-
 export type PizzaSize = "Small" | "Medium" | "Large";
 
 export type PizzaTopping =
@@ -27,7 +22,6 @@ export interface Order {
 }
 
 export const api = {
-  getPizzas: `${BASE_URL}/all`,
   getAllOrders: `${BASE_URL}/Orders`,
   calculateTotal: `${BASE_URL}/Orders/CalculateTotal`,
   createOrder: `${BASE_URL}/Orders`,

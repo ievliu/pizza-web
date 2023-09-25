@@ -2,9 +2,13 @@ import useAxios from "axios-hooks";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Order, PizzaSize, PizzaTopping, api } from "../api";
+import { Checkbox } from "../components/forms/checkbox";
+import { Radio } from "../components/forms/radio";
 
-const sizes: PizzaSize[] = ["Small", "Medium", "Large"];
-const toppings: PizzaTopping[] = [
+type FormError = "pizzaSize" | "pizzaToppings";
+
+const SIZES: PizzaSize[] = ["Small", "Medium", "Large"];
+const TOPPINGS: PizzaTopping[] = [
   "Cheese",
   "Pepperoni",
   "Sausage",
@@ -17,16 +21,15 @@ const toppings: PizzaTopping[] = [
   "Onion",
 ];
 
-type FormError = "pizzaSize" | "pizzaToppings";
-
 export const CreateOrder = () => {
+  const navigate = useNavigate();
   const [price, setPrice] = useState<number>();
   const [pizzaSize, setPizzaSize] = useState<PizzaSize>();
   const [pizzaToppings, setPizzaToppings] = useState<PizzaTopping[]>([]);
-  const [errors, setErrors] = useState<FormError[]>([]); // ["Pizza size is required", "Pizza toppings are required"
-  const navigate = useNavigate();
+  const [errors, setErrors] = useState<FormError[]>([]);
   const { calculateTotal, createOrder } = api;
-  const [, fetchTotal] = useAxios<number>(
+
+  const [, executeCalculateTotal] = useAxios<number>(
     {
       url: calculateTotal,
       method: "POST",
@@ -36,7 +39,7 @@ export const CreateOrder = () => {
     }
   );
 
-  const [, orderPizza] = useAxios<Order>(
+  const [, executeCreateOrder] = useAxios<Order>(
     {
       url: createOrder,
       method: "POST",
@@ -46,7 +49,7 @@ export const CreateOrder = () => {
     }
   );
 
-  const handleToppingChange = (topping: PizzaTopping, checked: boolean) => {
+  const handleToppingsChange = (topping: PizzaTopping, checked: boolean) => {
     if (checked) {
       setPizzaToppings([...pizzaToppings, topping]);
       setErrors(errors.filter((e) => e !== "pizzaToppings"));
@@ -57,10 +60,16 @@ export const CreateOrder = () => {
     setPrice(undefined);
   };
 
-  const handleCalculate = async () => {
+  const handlePizzaSizeChange = (pizzaSize: PizzaSize) => {
+    setPizzaSize(pizzaSize);
+    setPrice(undefined);
+    setErrors(errors.filter((e) => e !== "pizzaSize"));
+  };
+
+  const handleCalculateTotal = async () => {
     if (!validateForm()) return;
 
-    const { data } = await fetchTotal({
+    const { data } = await executeCalculateTotal({
       data: {
         pizzaSize,
         pizzaToppings,
@@ -69,10 +78,10 @@ export const CreateOrder = () => {
     setPrice(data);
   };
 
-  const handleOrderPizza = async () => {
+  const handleCreateOrder = async () => {
     if (!validateForm()) return;
 
-    const { data } = await orderPizza({
+    const { data } = await executeCreateOrder({
       data: {
         pizzaSize,
         pizzaToppings,
@@ -89,21 +98,15 @@ export const CreateOrder = () => {
     return errors.length === 0;
   };
 
-  const handlePizzaSize = (pizzaSize: PizzaSize) => {
-    setPizzaSize(pizzaSize);
-    setPrice(undefined);
-    setErrors(errors.filter((e) => e !== "pizzaSize"));
-  };
-
   return (
-    <div className="">
+    <div>
       <p className="pb-2 text-xl font-semibold">Select pizza size</p>
       <div className="flex justify-between p-1 border rounded-2xl border-accent">
-        {sizes.map((size) => (
+        {SIZES.map((size) => (
           <Radio
             key={size}
             currentlyChecked={pizzaSize}
-            onClick={handlePizzaSize}
+            onClick={handlePizzaSizeChange}
             name={size}
           />
         ))}
@@ -115,11 +118,10 @@ export const CreateOrder = () => {
       )}
       <p className="py-2 text-xl font-semibold">Select pizza toppings</p>
       <div className="flex flex-col p-1 border rounded-2xl border-accent">
-        <Checkbox onChange={handleToppingChange} name="Pepperoni" />
-        {toppings.map((topping) => (
+        {TOPPINGS.map((topping) => (
           <Checkbox
             key={topping}
-            onChange={handleToppingChange}
+            onChange={handleToppingsChange}
             name={topping}
           />
         ))}
@@ -132,59 +134,17 @@ export const CreateOrder = () => {
       <p className="py-2 text-xl font-semibold">Price</p>
       <div className="flex items-center justify-between p-1 rounded-2xl">
         <div className="flex gap-2">
-          <button onClick={handleCalculate} className="btn">
+          <button onClick={handleCalculateTotal} className="btn">
             Calculate
           </button>
           {price && (
-            <button onClick={handleOrderPizza} className="btn btn-accent">
+            <button onClick={handleCreateOrder} className="btn btn-accent">
               Order
             </button>
           )}
         </div>
         <span className="text-xl font-semibold">€ {price ?? " -"}</span>
       </div>
-    </div>
-  );
-};
-
-interface RadioProps {
-  name: PizzaSize;
-  currentlyChecked?: PizzaSize;
-  onClick: (pizzaSize: PizzaSize) => void;
-}
-
-const Radio = ({ name, onClick, currentlyChecked }: RadioProps) => {
-  return (
-    <label className="gap-2 cursor-pointer label">
-      <input
-        checked={currentlyChecked === name}
-        id={name}
-        onChange={() => onClick(name)}
-        type="radio"
-        name={name}
-        className="radio radio-accent"
-      />
-      <span className="label-text">{name}</span>
-    </label>
-  );
-};
-
-interface CheckboxProps {
-  name: PizzaTopping;
-  onChange: (topping: PizzaTopping, checked: boolean) => void;
-}
-
-const Checkbox = ({ name, onChange }: CheckboxProps) => {
-  return (
-    <div className="form-control">
-      <label className="cursor-pointer label">
-        <span className="label-text">{name}</span>
-        <input
-          onChange={(e) => onChange(name, e.target.checked)}
-          type="checkbox"
-          className="checkbox checkbox-accent"
-        />
-      </label>
     </div>
   );
 };
